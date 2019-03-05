@@ -47,30 +47,42 @@ class EasyPagination
     }
 
     public function search($buscar,$campos,$identificadorbase = 'a'){
-        $cadena = ''; foreach ($campos as $campo){ $cadena .= $identificadorbase.'.'.$campo.' LIKE :buscar OR ';} $cadena = trim($cadena,'OR ');
+        if($buscar!= null && trim($buscar) != ''){
+            $cadena = ''; foreach ($campos as $campo){ $cadena .= $identificadorbase.'.'.$campo.' LIKE :buscar OR ';} $cadena = trim($cadena,'OR ');
 
-        $this->qb->andwhere($cadena)->setParameter('buscar',$buscar . '%');
-        $this->qbcount->andwhere($cadena)->setParameter('buscar',$buscar . '%');
+            $this->qb->andwhere($cadena)->setParameter('buscar',$buscar . '%');
+            $this->qbcount->andwhere($cadena)->setParameter('buscar',$buscar . '%');
+        }
     }
 
     public function where($campo,$comparacion,$valor,$identificadorbase = 'a'){
-        $this->wheres++;
-        if(trim($comparacion) == 'IN'){
-            $this->qb->andwhere($identificadorbase.'.'.$campo.' '.$comparacion.' (:donde'.$this->wheres.')')->setParameter('donde'.$this->wheres,$valor);
-            $this->qbcount->andwhere($identificadorbase.'.'.$campo.' '.$comparacion.' (:donde'.$this->wheres.')')->setParameter('donde'.$this->wheres,$valor);
-        }else{
-            $this->qb->andwhere($identificadorbase.'.'.$campo.' '.$comparacion.' :donde'.$this->wheres)->setParameter('donde'.$this->wheres,$valor);
-            $this->qbcount->andwhere($identificadorbase.'.'.$campo.' '.$comparacion.' :donde'.$this->wheres)->setParameter('donde'.$this->wheres,$valor);
+        if(($campo != null) && (trim($campo) != '') && ($valor != null) && (trim($valor) != '')) {
+            $this->wheres++;
+            if (trim($comparacion) == 'IN') {
+                $this->qb->andwhere($identificadorbase . '.' . $campo . ' ' . $comparacion . ' (:donde' . $this->wheres . ')')->setParameter('donde' . $this->wheres,
+                    $valor);
+                $this->qbcount->andwhere($identificadorbase . '.' . $campo . ' ' . $comparacion . ' (:donde' . $this->wheres . ')')->setParameter('donde' . $this->wheres,
+                    $valor);
+            } else {
+                $this->qb->andwhere($identificadorbase . '.' . $campo . ' ' . $comparacion . ' :donde' . $this->wheres)->setParameter('donde' . $this->wheres,
+                    $valor);
+                $this->qbcount->andwhere($identificadorbase . '.' . $campo . ' ' . $comparacion . ' :donde' . $this->wheres)->setParameter('donde' . $this->wheres,
+                    $valor);
+            }
         }
     }
 
     public function leftJoin($campo,$identificador,$identificadorbase = 'a'){
-        $this->qb->leftJoin($identificadorbase.'.'.$campo, $identificador);
-        $this->qbcount->leftJoin($identificadorbase.'.'.$campo, $identificador);
+        if($campo!= null && trim($campo) != ''){
+            $this->qb->leftJoin($identificadorbase.'.'.$campo, $identificador);
+            $this->qbcount->leftJoin($identificadorbase.'.'.$campo, $identificador);
+        }
     }
 
-    public function order($columna,$orden,$identificadorbase = 'a'){
-        $this->qb->orderby($identificadorbase.'.'.$columna,($orden=='ASC'?'ASC':'DESC'));
+    public function order($campo,$orden,$identificadorbase = 'a'){
+        if($campo!= null && trim($campo) != ''){
+            $this->qb->orderby($identificadorbase.'.'.$campo,($orden=='ASC'?'ASC':'DESC'));
+        }
     }
 
     public function execute(){
@@ -90,7 +102,7 @@ class EasyPagination
                 $inicio = 1;
                 $fin = $this->totalpages;
             } else {
-                if ($this->pagina - 3 < 0) {
+                if ($this->pagina - 3 < 1) {
                     $inicio = 1;
                     $fin = $this->pagina + 3 + (3 - $this->pagina);//3 a la derecha mas los links que no se puedieron mostrar en la izquierda
                 } elseif (($this->pagina + 3) > $this->totalpages) {
